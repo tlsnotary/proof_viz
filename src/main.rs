@@ -1,7 +1,7 @@
 extern crate base64;
 use elliptic_curve::pkcs8::DecodePublicKey;
 use std::collections::HashMap;
-use std::time::Duration;
+use web_time::Duration;
 
 use gloo::file::callbacks::FileReader;
 use gloo::file::File;
