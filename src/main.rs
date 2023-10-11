@@ -159,17 +159,14 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
 
         // Verify the session proof against the Notary's public key
         fn verify_proof(session: &SessionProof) -> String {
-            // FIXME: this does not work yet
-            return String::from("TODO");
-
             // This verifies the identity of the server using a default certificate verifier which trusts
             // the root certificates from the `webpki-roots` crate.
 
-            // let v = session.verify_with_default_cert_verifier(notary_pubkey());
-            // match v {
-            //     Ok(_) => return "Proof successfully verified ✅".to_string(),
-            //     Err(error) => return error.to_string(),
-            // };
+            let v = session.verify_with_default_cert_verifier(notary_pubkey());
+            match v {
+                Ok(_) => return "Proof successfully verified ✅".to_string(),
+                Err(error) => return error.to_string(),
+            }
         }
 
         fn parse_tls_proof(json_str: &str) -> Html {
