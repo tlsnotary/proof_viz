@@ -9,6 +9,7 @@ use web_time::Duration;
 use web_sys::{DragEvent, Event, FileList, HtmlInputElement};
 use yew::html::TargetCast;
 use yew::{html, Callback, Component, Context, Html};
+use yew_icons::{Icon, IconId};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
 use tlsn_core::NotarizedSession;
@@ -80,7 +81,7 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div id="wrapper">
-                <p id="title">{ "Upload Your TLSNotary Proof" }</p>
+                <p id="title" class="text-3xl font-bold">{ "Upload Your TLSNotary Proof" }</p>
                 <label for="file-upload">
                     <div
                         id="drop-container"
@@ -96,8 +97,9 @@ impl Component for App {
                             event.prevent_default();
                         })}
                     >
-                        <i class="fa fa-cloud-upload"></i>
-                        <p>{"Drop your proof.json file here or click to select"}</p>
+                    <Icon icon_id={IconId::FontAwesomeSolidUpload} width={"3em".to_owned()} height={"3em".to_owned()} />
+                    // <Icon icon_id={IconId::BootstrapCloudUploadFill} width={"3em".to_owned()} height={"3em".to_owned()} />
+                    <p>{"Drop your proof.json file here or click to select"}</p>
                     </div>
                 </label>
                 <input
