@@ -1,0 +1,64 @@
+# https://www.reddit.com/r/learnrust/comments/13w47uq/how_to_deploy_your_yew_wasm_project_into_github/
+name: deploy proof_viz
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Trunk
+        uses: jetli/trunk-action@v0.4.0
+        with:
+          # Optional version of trunk to install(eg. 'v0.16.0', 'latest')
+          version: "latest"
+      - name: Add wasm target
+        run: |
+          rustup target add wasm32-unknown-unknown      
+      - name: Build the Rust WASM app and all of its assets
+        run: trunk build --public-url ${{ github.event.repository.name }} --release
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: "./dist"
+
+  deploy:
+    needs: build    # Add a dependency to the build job
+    
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+        pages: write      # to deploy to Pages
+        id-token: write   # to verify the deployment originates from an appropriate source
+
+        # Deploy to the github-pages environment
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
+      # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
