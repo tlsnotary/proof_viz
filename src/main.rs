@@ -1,17 +1,19 @@
 extern crate base64;
 use elliptic_curve::pkcs8::DecodePublicKey;
-use std::collections::HashMap;
-use web_time::Duration;
-
 use gloo::file::callbacks::FileReader;
 use gloo::file::File;
+use std::collections::HashMap;
 use std::str;
-use tlsn_core::NotarizedSession;
+use web_time::Duration;
+
 use web_sys::{DragEvent, Event, FileList, HtmlInputElement};
 use yew::html::TargetCast;
 use yew::{html, Callback, Component, Context, Html};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
+use tlsn_core::NotarizedSession;
+
+const REDACTED_CHAR: &str = "█";
 
 struct FileDetails {
     name: String,
@@ -131,7 +133,7 @@ impl App {
                     return html! {
                         <>
                         <li>
-                        <b>{"domain:" }</b>{notarized_session.data().server_name().as_str().to_string()}
+                        <b>{"domain: " }</b>{notarized_session.data().server_name().as_str().to_string()}
                         </li>
                         <li>
                         <b>{"Notarization time: " }</b>{time}
@@ -158,15 +160,13 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
         }
 
         // Verify the session proof against the Notary's public key
-        fn verify_proof(session: &SessionProof) -> String {
+        fn verify_proof(session: &SessionProof) -> Result<(), String> {
             // This verifies the identity of the server using a default certificate verifier which trusts
             // the root certificates from the `webpki-roots` crate.
 
-            let v = session.verify_with_default_cert_verifier(notary_pubkey());
-            match v {
-                Ok(_) => return "Proof successfully verified ✅".to_string(),
-                Err(error) => return error.to_string(),
-            }
+            session
+                .verify_with_default_cert_verifier(notary_pubkey())
+                .or_else(|err| return Err(err.to_string()))
         }
 
         fn parse_tls_proof(json_str: &str) -> Html {
@@ -185,7 +185,21 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                         substrings,
                     } = tls_proof;
 
-                    let proof_verification_feedback = verify_proof(&session);
+                    let proof_verification = verify_proof(&session);
+
+                    if proof_verification.is_err() {
+                        return html! {
+                            <>
+                                <li>
+                                    <p style="color:red">
+                                        <b>{"Invalid Proof: " }</b>{proof_verification.unwrap_err().to_string()}{ " ❌" }
+                                    </p>
+                                </li>
+                            </>
+                        };
+                    }
+
+                    let proof_verification_feedback = "Proof successfully verified ✅".to_string();
 
                     let SessionProof {
                         // The session header that was signed by the Notary is a succinct commitment to the TLS transcript.
@@ -204,8 +218,16 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                     let (mut sent, mut recv) = substrings.verify(&header).unwrap();
 
                     // Replace the bytes which the Prover chose not to disclose with 'X'
-                    sent.set_redacted(b'X');
-                    recv.set_redacted(b'X');
+                    sent.set_redacted(b'\0');
+                    recv.set_redacted(b'\0');
+
+                    let bytes_send = String::from_utf8(sent.data().to_vec())
+                        .unwrap()
+                        .replace("\0", REDACTED_CHAR);
+
+                    let bytes_received = String::from_utf8(recv.data().to_vec())
+                        .unwrap()
+                        .replace("\0", REDACTED_CHAR);
 
                     return html! {
                         <>
@@ -220,11 +242,11 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                             </li>
                             <li>
                                 <b>{"Bytes send: " }</b>
-                                <pre>{format!("{}", String::from_utf8(sent.data().to_vec()).unwrap())}</pre>
+                                <pre>{format!("{}", bytes_send)}</pre>
                             </li>
                             <li>
                                 <b>{"Bytes received: " }</b>
-                                <pre>{format!("{}", String::from_utf8(recv.data().to_vec()).unwrap())}</pre>
+                                <pre>{format!("{}", bytes_received )}</pre>
                             </li>
                         </>
                     };
