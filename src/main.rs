@@ -80,38 +80,45 @@ impl Component for App {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div id="wrapper">
+            <div id="wrapper dark">
                 <p id="title" class="text-3xl font-bold">{ "Upload Your TLSNotary Proof" }</p>
-                <label for="file-upload">
-                    <div
-                        id="drop-container"
-                        ondrop={ctx.link().callback(|event: DragEvent| {
-                            event.prevent_default();
-                            let files = event.data_transfer().unwrap().files();
-                            Self::upload_files(files)
+
+                <div class="flex items-center justify-center w-full">
+                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6"
+                            id="dropzone-file"
+                            ondrop={ctx.link().callback(|event: DragEvent| {
+                                event.prevent_default();
+                                let files = event.data_transfer().unwrap().files();
+                                Self::upload_files(files)
+                            })}
+                            ondragover={Callback::from(|event: DragEvent| {
+                                event.prevent_default();
+                            })}
+                            ondragenter={Callback::from(|event: DragEvent| {
+                                event.prevent_default();
+                            })}
+                        >
+                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">{"Drop your \""}<span class="font-mono">{"proof.json"}</span>{"\" file here"}</span>{" or click to select"}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{"The JSON output of your prover"}</p>
+                        </div>
+                    </label>
+                    <input
+                        id="dropzone-file"
+                        type="file"
+                        class="hidden"
+                        accept="application/json"
+                        multiple={false}
+                        onchange={ctx.link().callback(move |e: Event| {
+                            let input: HtmlInputElement = e.target_unchecked_into();
+                            Self::upload_files(input.files())
                         })}
-                        ondragover={Callback::from(|event: DragEvent| {
-                            event.prevent_default();
-                        })}
-                        ondragenter={Callback::from(|event: DragEvent| {
-                            event.prevent_default();
-                        })}
-                    >
-                    <Icon icon_id={IconId::FontAwesomeSolidUpload} width={"3em".to_owned()} height={"3em".to_owned()} />
-                    // <Icon icon_id={IconId::BootstrapCloudUploadFill} width={"3em".to_owned()} height={"3em".to_owned()} />
-                    <p>{"Drop your proof.json file here or click to select"}</p>
-                    </div>
-                </label>
-                <input
-                    id="file-upload"
-                    type="file"
-                    accept="application/json"
-                    multiple={true}
-                    onchange={ctx.link().callback(move |e: Event| {
-                        let input: HtmlInputElement = e.target_unchecked_into();
-                        Self::upload_files(input.files())
-                    })}
-                />
+                    />
+                </div>
+
                 <div id="preview-area">
                     { for self.files.iter().map(Self::view_file) }
                 </div>
@@ -194,14 +201,15 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                             <>
                                 <li>
                                     <p style="color:red">
-                                        <b>{"Invalid Proof: " }</b>{proof_verification.unwrap_err().to_string()}{ " ❌" }
+                                        <b>{"Invalid Proof: " }</b>{ "❌ " }{proof_verification.unwrap_err().to_string()}{ " ❌" }
                                     </p>
                                 </li>
                             </>
                         };
                     }
 
-                    let proof_verification_feedback = "Proof successfully verified ✅".to_string();
+                    let proof_verification_feedback =
+                        "✅ Proof successfully verified ✅".to_string();
 
                     let SessionProof {
                         // The session header that was signed by the Notary is a succinct commitment to the TLS transcript.
@@ -232,25 +240,34 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                         .replace("\0", REDACTED_CHAR);
 
                     return html! {
-                        <>
-                            <li>
-                                <b>{"domain:" }</b>{server_name.as_str().to_string()}
-                            </li>
-                            <li>
-                                <b>{"Notarization time: " }</b>{time}
-                            </li>
-                            <li>
-                                <b>{"Proof: " }</b>{proof_verification_feedback}
-                            </li>
-                            <li>
+                        <div class="flex flex-col">
+                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
+                                <b>{"Server domain:" }</b>
+                                <div class="bg-black text-white p-4 rounded-md">
+                                    <pre>{server_name.as_str().to_string()}</pre>
+                                </div>
+                                <b>{"Notarization time:" }</b>
+                                <div class="bg-black text-white p-4 rounded-md">
+                                    <pre>{time}</pre>
+                                </div>
+                                <b>{"Proof:" }</b>
+                                <div class="bg-black text-white p-4 rounded-md">
+                                    <pre>{proof_verification_feedback}</pre>
+                                </div>
+                            </div>
+                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
                                 <b>{"Bytes send: " }</b>
-                                <pre>{format!("{}", bytes_send)}</pre>
-                            </li>
-                            <li>
+                                <div class="bg-black text-white p-4 rounded-md">
+                                    <pre>{format!("{}", bytes_send)}</pre>
+                                </div>
+                            </div>
+                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
                                 <b>{"Bytes received: " }</b>
-                                <pre>{format!("{}", bytes_received )}</pre>
-                            </li>
-                        </>
+                                <div class="bg-black text-white p-4 rounded-md">
+                                    <pre>{format!("{}", bytes_received)}</pre>
+                                </div>
+                            </div>
+                        </div>
                     };
                 }
                 Err(e) => html! {
@@ -264,26 +281,28 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
             <div class="preview-tile">
                 <p class="preview-name">{ format!("{}", file.name) }</p>
                 <div class="preview-media">
+                    <div class="container mx-auto px-4">
                     if file.file_type.contains("application/json") {
                         <div>
-                            {"Proof:"}
                             <ul>
                                 {parse_tls_proof(json_str)}
                             </ul>
                         </div>
-                        <div>
-                            {"Notarized session:"}
-                            <ul>
-                                {parse_notarized_session(json_str)}
-                            </ul>
-                        </div>
-                        <div>
-                            {"Raw json:"}
-                            <pre>
-                            {json_str}
-                            </pre>
-                        </div>
+                        // <div>
+                        //     {"Notarized session:"}
+                        //     <ul>
+                        //         {parse_notarized_session(json_str)}
+                        //     </ul>
+                        // </div>
+
+                        // <div>
+                        //     {"Raw json:"}
+                        //     <div class="bg-black text-white p-4 rounded-md">
+                        //         <pre id="logContent" class="whitespace-pre-wrap font-mono">{json_str}</pre>
+                        //     </div>
+                        // </div>
                     }
+                    </div>
                 </div>
             </div>
         }
