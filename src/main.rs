@@ -246,7 +246,7 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                 </div>
                                 <b>{"Notarization time:" }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
-                                    <pre>{time}</pre>
+                                    <pre>{time.to_string()}</pre>
                                 </div>
                                 <b>{"Proof:" }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
@@ -308,17 +308,17 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
     }
 
     fn upload_files(files: Option<FileList>) -> Msg {
-        let mut result = Vec::new();
-
         if let Some(files) = files {
             let files = js_sys::try_iter(&files)
                 .unwrap()
                 .unwrap()
                 .map(|v| web_sys::File::from(v.unwrap()))
-                .map(File::from);
-            result.extend(files);
+                .map(File::from)
+                .collect();
+            Msg::Files(files)
+        } else {
+            Msg::Files(Vec::with_capacity(0))
         }
-        Msg::Files(result)
     }
 }
 
