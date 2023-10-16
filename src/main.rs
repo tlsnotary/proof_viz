@@ -80,46 +80,44 @@ impl Component for App {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div id="wrapper dark">
-                <p id="title" class="text-3xl font-bold">{ "Upload Your TLSNotary Proof" }</p>
+            <div class="w-4/5 m-auto">
+                <p class="text-2xl text-center">{ "Upload Your TLSNotary Proof" }</p>
 
-                <div class="flex items-center justify-center w-full">
-                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6"
-                            id="dropzone-file"
-                            ondrop={ctx.link().callback(|event: DragEvent| {
-                                event.prevent_default();
-                                let files = event.data_transfer().unwrap().files();
-                                Self::upload_files(files)
-                            })}
-                            ondragover={Callback::from(|event: DragEvent| {
-                                event.prevent_default();
-                            })}
-                            ondragenter={Callback::from(|event: DragEvent| {
-                                event.prevent_default();
-                            })}
-                        >
-                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                            </svg>
-                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">{"Drop your \""}<span class="font-mono">{"proof.json"}</span>{"\" file here"}</span>{" or click to select"}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{"The JSON output of your prover"}</p>
-                        </div>
-                    </label>
-                    <input
-                        id="dropzone-file"
-                        type="file"
-                        class="hidden"
-                        accept="application/json"
-                        multiple={false}
-                        onchange={ctx.link().callback(move |e: Event| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            Self::upload_files(input.files())
+                <label for="file-upload" class="cursor-pointer">
+                    <div class="p-16 flex flex-col justify-center items-center bg-zinc-700 border border-white border-dashed rounded-2xl"
+                        id="drop-container"
+                        ondrop={ctx.link().callback(|event: DragEvent| {
+                            event.prevent_default();
+                            let files = event.data_transfer().unwrap().files();
+                            Self::upload_files(files)
                         })}
-                    />
-                </div>
+                        ondragover={Callback::from(|event: DragEvent| {
+                            event.prevent_default();
+                        })}
+                        ondragenter={Callback::from(|event: DragEvent| {
+                            event.prevent_default();
+                        })}
+                    >
+                        <svg class="w-16 h-16 text-white-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p class="text-base text-white-50"><span class="font-semibold">{"Drop your \""}<span class="font-mono">{"proof.json"}</span>{"\" file here"}</span>{" or click to select"}</p>
+                        <p class="text-sm text-gray-500">{"This is the JSON output of your prover"}</p>
+                    </div>
+                </label>
+                <input
+                    id="file-upload"
+                    class="invisible"
+                    type="file"
+                    accept="application/json"
+                    multiple={true}
+                    onchange={ctx.link().callback(move |e: Event| {
+                        let input: HtmlInputElement = e.target_unchecked_into();
+                        Self::upload_files(input.files())
+                    })}
+                />
 
-                <div id="preview-area">
+                <div>
                     { for self.files.iter().rev().map(Self::view_file) }
                 </div>
             </div>
@@ -241,7 +239,7 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
 
                     return html! {
                         <div class="flex flex-col">
-                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
+                            <div class="w-full">
                                 <b>{"Server domain:" }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
                                     <pre>{server_name.as_str().to_string()}</pre>
@@ -255,13 +253,13 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                     <pre>{proof_verification_feedback}</pre>
                                 </div>
                             </div>
-                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
+                            <div class="w-full">
                                 <b>{"Bytes send: " }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
                                     <pre>{format!("{}", bytes_send)}</pre>
                                 </div>
                             </div>
-                            <div class="w-full border-2 border-gray-300 border-dashed rounded-lg">
+                            <div class="w-full">
                                 <b>{"Bytes received: " }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
                                     <pre>{format!("{}", bytes_received)}</pre>
@@ -278,9 +276,10 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
 
         let json_str = str::from_utf8(&file.data).unwrap();
         html! {
-            <div class="preview-tile">
-                <p class="preview-name">{ format!("{}", file.name) }</p>
-                <div class="preview-media">
+            <div class="p-4 flex flex-col justify-center items-center bg-zinc-700 border border-white border-dashed rounded-2xl">
+                <p class="text-center">{ format!("{}", file.name) }</p>
+
+                <div class="flex-1 flex flex-col justify-center p-4">
                     <div class="container mx-auto px-4">
                     if file.file_type.contains("application/json") {
                         <div>
