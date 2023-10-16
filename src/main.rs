@@ -120,7 +120,7 @@ impl Component for App {
                 </div>
 
                 <div id="preview-area">
-                    { for self.files.iter().map(Self::view_file) }
+                    { for self.files.iter().rev().map(Self::view_file) }
                 </div>
             </div>
         }
