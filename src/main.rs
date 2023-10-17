@@ -8,7 +8,7 @@ use web_time::Duration;
 
 use web_sys::{DragEvent, Event, FileList, HtmlInputElement};
 use yew::html::TargetCast;
-use yew::{html, Callback, Component, Context, Html};
+use yew::{html, AttrValue, Callback, Component, Context, Html};
 use yew_icons::{Icon, IconId};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
@@ -79,9 +79,31 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let link_classes =
+            "block px-4 py-2 hover:bg-black hover:text-white rounded border-black border";
+        let links = [
+            ("About TLSNotary", "https://tlsnotary.org"),
+            // ("PSE", "https://pse.dev"),
+        ];
         html! {
+        <div class="flex flex-col h-screen">
+            <nav class="bg-zinc-700 h-16 px-8 py-2">
+                <div class="container flex mx-auto gap-6 items-center h-full">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <g>
+                            <path fill="#ffffff" d="m15 22-.693 1.04A1.25 1.25 0 0 0 16.25 22H15Zm-3-2 .693-1.04a1.25 1.25 0 0 0-1.386 0L12 20Zm-3 2H7.75a1.25 1.25 0 0 0 1.943 1.04L9 22ZM8.75 3.537l-.1 1.246.1-1.246Zm1.685-.697-.952-.81.952.81ZM6.532 5.686l-1.246.1 1.246-.1Zm2.154-2.154.1-1.246-.1 1.246ZM5.84 7.435l.81.952-.81-.952Zm.697-1.684 1.246-.1-1.246.1Zm-.747 4.772-.81.952.81-.952Zm0-3.046-.81-.952.81.952Zm.747 4.772-1.246-.1 1.246.1Zm-.697-1.684.81-.952-.81.952Zm2.846 3.903.1 1.246-.1-1.246Zm-2.154-2.154 1.246.1-1.246-.1Zm3.903 2.846.952-.81-.952.81Zm-1.684-.697-.1-1.246.1 1.246Zm4.772.747.952.81-.952-.81Zm-3.046 0-.952.81.952-.81Zm4.772-.747.1-1.246-.1 1.246Zm-1.684.697-.952-.81.952.81Zm3.903-2.846 1.246-.1-1.246.1Zm-2.154 2.154-.1 1.246.1-1.246Zm2.846-3.903.81.952-.81-.952Zm-.697 1.684-1.246.1 1.246-.1Zm.747-4.772.81-.952-.81.952Zm0 3.046-.81-.952.81.952Zm-.747-4.772-1.246-.1 1.246.1Zm.697 1.684-.81.952.81-.952Zm-2.846-3.903-.1-1.246.1 1.246Zm2.154 2.154 1.246.1-1.246-.1ZM13.565 2.84l.952-.81-.952.81Zm1.684.697.1 1.246-.1-1.246Zm-1.726-.747-.952.81.952-.81Zm-3.046 0 .952.81-.952-.81ZM9 14.458l.055-1.248L9 14.458Zm6.693 6.502-3-2-1.386 2.08 3 2 1.386-2.08Zm-4.386-2-3 2 1.386 2.08 3-2-1.386-2.08ZM12.57 3.6l.042.05 1.904-1.62-.042-.05L12.57 3.6Zm2.779 1.183.064-.005-.2-2.492-.065.005.2 2.492Zm.872.803-.005.064 2.492.201.005-.065-2.492-.2Zm1.128 2.8.05.043 1.62-1.904-.05-.042-1.62 1.904Zm.05 1.185-.05.042 1.62 1.904.05-.042-1.62-1.904Zm-1.183 2.779.005.064 2.492-.2-.005-.065-2.492.2Zm-.803.872-.064-.005-.201 2.492.065.005.2-2.492Zm-2.8 1.128-.043.05 1.904 1.62.042-.05-1.904-1.62Zm-1.185.05-.042-.05-1.904 1.62.042.05 1.904-1.62ZM8.65 13.217l-.064.005.2 2.492.065-.005-.2-2.492Zm-.872-.803.005-.064-2.492-.201-.005.065 2.492.2Zm-1.128-2.8L6.6 9.57l-1.62 1.904.05.042 1.62-1.904ZM6.6 8.428l.05-.042-1.62-1.904-.05.042L6.6 8.429ZM7.783 5.65l-.005-.064-2.492.2.005.065 2.492-.2Zm.803-.872.064.005.201-2.492-.065-.005-.2 2.492Zm2.8-1.128.043-.05-1.904-1.62-.042.05 1.904 1.62ZM8.65 4.783a3.25 3.25 0 0 0 2.737-1.133L9.483 2.03a.75.75 0 0 1-.632.261l-.2 2.492Zm-.872.803a.75.75 0 0 1 .808-.808l.2-2.492a3.25 3.25 0 0 0-3.5 3.5l2.492-.2Zm-1.128 2.8A3.25 3.25 0 0 0 7.783 5.65l-2.492.201a.75.75 0 0 1-.261.632l1.62 1.904ZM6.6 9.572a.75.75 0 0 1 0-1.142L4.98 6.525a3.25 3.25 0 0 0 0 4.95L6.6 9.571Zm1.183 2.779A3.25 3.25 0 0 0 6.65 9.613l-1.62 1.904a.75.75 0 0 1 .261.632l2.492.2Zm.803.872a.75.75 0 0 1-.808-.808l-2.492-.2a3.25 3.25 0 0 0 3.5 3.5l-.2-2.492ZM12.57 14.4a.75.75 0 0 1-1.142 0l-1.904 1.62a3.25 3.25 0 0 0 4.95 0L12.57 14.4Zm3.651-1.986a.75.75 0 0 1-.808.808l-.2 2.492a3.25 3.25 0 0 0 3.5-3.5l-2.492.2Zm1.128-2.8a3.25 3.25 0 0 0-1.133 2.736l2.492-.201a.75.75 0 0 1 .261-.632l-1.62-1.904Zm.05-1.185a.75.75 0 0 1 0 1.142l1.62 1.904a3.25 3.25 0 0 0 0-4.95L17.4 8.429ZM16.217 5.65a3.25 3.25 0 0 0 1.133 2.737l1.62-1.904a.75.75 0 0 1-.261-.632l-2.492-.2Zm-.803-.872a.75.75 0 0 1 .808.808l2.492.2a3.25 3.25 0 0 0-3.5-3.5l.2 2.492Zm-2.8-1.128a3.25 3.25 0 0 0 2.736 1.133l-.201-2.492a.75.75 0 0 1-.632-.261l-1.904 1.62Zm1.861-1.67a3.25 3.25 0 0 0-4.95 0l1.904 1.62a.75.75 0 0 1 1.142 0l1.904-1.62Zm-3.088 12.37a3.25 3.25 0 0 0-2.332-1.14l-.11 2.497a.75.75 0 0 1 .538.263l1.904-1.62Zm-2.332-1.14a3.26 3.26 0 0 0-.405.007l.201 2.492a.732.732 0 0 1 .094-.002l.11-2.497ZM10.25 22v-7.542h-2.5V22h2.5Zm5.1-8.783a3.26 3.26 0 0 0-.405-.007l.11 2.497a.99.99 0 0 1 .094.002l.2-2.492Zm-.405-.007a3.25 3.25 0 0 0-2.332 1.14l1.904 1.62a.75.75 0 0 1 .538-.263l-.11-2.497Zm-1.195 1.248V22h2.5v-7.542h-2.5Z"/>
+                            <path stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m14 8-3 3-1-1"/>
+                    </g>
+                    </svg>
+                    <h1 class="font-bold text-2xl text-white">{"Check TLSNotary proofs"}</h1>
+                    <div class="flex-1"></div>
+                    {for links.iter().map(|(label, href)| html! {
+                        <a class={link_classes} href={*href}>{label}</a>
+                    })}
+                </div>
+            </nav>
             <div class="w-4/5 m-auto">
-                <p class="text-2xl text-center">{ "Upload Your TLSNotary Proof" }</p>
+                // <p class="text-2xl text-center">{ "Upload Your TLSNotary Proof" }</p>
 
                 <label for="file-upload" class="cursor-pointer">
                     <div class="p-16 flex flex-col justify-center items-center bg-zinc-700 border border-white border-dashed rounded-2xl"
@@ -121,6 +143,7 @@ impl Component for App {
                     { for self.files.iter().rev().map(Self::view_file) }
                 </div>
             </div>
+        </div>
         }
     }
 }
@@ -139,12 +162,12 @@ impl App {
 
                     return html! {
                         <>
-                        <li>
-                        <b>{"domain: " }</b>{notarized_session.data().server_name().as_str().to_string()}
-                        </li>
-                        <li>
-                        <b>{"Notarization time: " }</b>{time}
-                        </li>
+                            <li>
+                                <b>{"domain: " }</b>{notarized_session.data().server_name().as_str().to_string()}
+                            </li>
+                            <li>
+                                <b>{"Notarization time: " }</b>{time}
+                            </li>
                         </>
                     };
                 }
@@ -197,11 +220,9 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                     if proof_verification.is_err() {
                         return html! {
                             <>
-                                <li>
-                                    <p style="color:red">
-                                        <b>{"Invalid Proof: " }</b>{ "❌ " }{proof_verification.unwrap_err().to_string()}{ " ❌" }
-                                    </p>
-                                </li>
+                                <p style="color:red">
+                                    <b>{"Invalid Proof: " }</b>{ "❌ " }{proof_verification.unwrap_err().to_string()}{ " ❌" }
+                                </p>
                             </>
                         };
                     }
@@ -237,9 +258,14 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                         .unwrap()
                         .replace("\0", REDACTED_CHAR);
 
+                    // let test = Html::from_html_unchecked(AttrValue::from(
+                    //     "<pre> test <span style=\"color:red;\">tadf</span> </pre>",
+                    // ));
+
                     return html! {
-                        <div class="flex flex-col">
-                            <div class="w-full">
+                        <div class="p-4 flex flex-col justify-center items-center w-full">
+                            // {test}
+                            <div class="p-4 w-5/6">
                                 <b>{"Server domain:" }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
                                     <pre>{server_name.as_str().to_string()}</pre>
@@ -253,15 +279,15 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                     <pre>{proof_verification_feedback}</pre>
                                 </div>
                             </div>
-                            <div class="w-full">
+                            <div class="p-4 w-5/6">
                                 <b>{"Bytes send: " }</b>
-                                <div class="bg-black text-white p-4 rounded-md">
+                                <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
                                     <pre>{format!("{}", bytes_send)}</pre>
                                 </div>
                             </div>
-                            <div class="w-full">
+                            <div class="p-4 w-5/6">
                                 <b>{"Bytes received: " }</b>
-                                <div class="bg-black text-white p-4 rounded-md">
+                                <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
                                     <pre>{format!("{}", bytes_received)}</pre>
                                 </div>
                             </div>
