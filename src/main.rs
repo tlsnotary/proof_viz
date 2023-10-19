@@ -16,6 +16,10 @@ use tlsn_core::NotarizedSession;
 
 const REDACTED_CHAR: &str = "█";
 
+mod components;
+use crate::components::redactedBytesComponent::Direction;
+use crate::components::redactedBytesComponent::RedactedBytesComponent;
+
 struct FileDetails {
     name: String,
     file_type: String,
@@ -220,9 +224,14 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                     if proof_verification.is_err() {
                         return html! {
                             <>
-                                <p style="color:red">
-                                    <b>{"Invalid Proof: " }</b>{ "❌ " }{proof_verification.unwrap_err().to_string()}{ " ❌" }
-                                </p>
+                                <div role="alert">
+                                    <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
+                                        {"Invalid Proof"}
+                                    </div>
+                                    <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+                                        { "❌ " }{proof_verification.unwrap_err().to_string()}
+                                    </div>
+                                </div>
                             </>
                         };
                     }
@@ -242,26 +251,19 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                     let time = chrono::DateTime::UNIX_EPOCH + Duration::from_secs(header.time());
 
                     // Verify the substrings proof against the session header.
-                    //
+
                     // This returns the redacted transcripts
                     let (mut sent, mut recv) = substrings.verify(&header).unwrap();
 
-                    // Replace the bytes which the Prover chose not to disclose with 'X'
+                    // Replace the bytes which the Prover chose not to disclose with '\0'
                     sent.set_redacted(b'\0');
                     recv.set_redacted(b'\0');
 
-                    let bytes_send = String::from_utf8(sent.data().to_vec())
-                        .unwrap()
-                        .replace("\0", REDACTED_CHAR);
+                    let bytes_send = String::from_utf8(sent.data().to_vec()).unwrap();
 
-                    let bytes_received = String::from_utf8(recv.data().to_vec())
-                        .unwrap()
-                        .replace("\0", REDACTED_CHAR);
+                    let bytes_received = String::from_utf8(recv.data().to_vec()).unwrap();
 
-                    // let test = Html::from_html_unchecked(AttrValue::from(
-                    //     "<pre> test <span style=\"color:red;\">tadf</span> </pre>",
-                    // ));
-
+                    let direction = Direction::Send;
                     return html! {
                         <div class="p-4 flex flex-col justify-center items-center w-full">
                             // {test}
@@ -279,18 +281,9 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                     <pre>{proof_verification_feedback}</pre>
                                 </div>
                             </div>
-                            <details class="p-4 w-5/6" open={true}>
-                                <summary><b>{"Bytes send: " }</b></summary>
-                                <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
-                                    <pre>{format!("{}", bytes_send)}</pre>
-                                </div>
-                            </details>
-                            <details class="p-4 w-5/6" open={true}>
-                                <summary><b>{"Bytes received: " }</b></summary>
-                                <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
-                                    <pre>{format!("{}", bytes_received)}</pre>
-                                </div>
-                            </details>
+                            <RedactedBytesComponent direction={Direction::Send} bytes={bytes_send} />
+
+                            <RedactedBytesComponent direction={Direction::Received} bytes={bytes_received} />
 
                         </div>
                     };
