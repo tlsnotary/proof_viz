@@ -279,18 +279,19 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                     <pre>{proof_verification_feedback}</pre>
                                 </div>
                             </div>
-                            <div class="p-4 w-5/6">
-                                <b>{"Bytes send: " }</b>
+                            <details class="p-4 w-5/6" open={true}>
+                                <summary><b>{"Bytes send: " }</b></summary>
                                 <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
                                     <pre>{format!("{}", bytes_send)}</pre>
                                 </div>
-                            </div>
-                            <div class="p-4 w-5/6">
-                                <b>{"Bytes received: " }</b>
+                            </details>
+                            <details class="p-4 w-5/6" open={true}>
+                                <summary><b>{"Bytes received: " }</b></summary>
                                 <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
                                     <pre>{format!("{}", bytes_received)}</pre>
                                 </div>
-                            </div>
+                            </details>
+
                         </div>
                     };
                 }
