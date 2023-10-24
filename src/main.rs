@@ -87,6 +87,7 @@ impl Component for App {
             "block px-4 py-2 hover:bg-black hover:text-white rounded border-black border";
         let links = [
             ("About TLSNotary", "https://tlsnotary.org"),
+            ("Source", "https://github.com/tlsnotary/proof_viz"),
             // ("PSE", "https://pse.dev"),
         ];
         html! {
