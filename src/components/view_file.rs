@@ -1,5 +1,4 @@
 extern crate base64;
-use elliptic_curve::pkcs8::DecodePublicKey;
 use std::str;
 use web_time::Duration;
 
@@ -7,41 +6,30 @@ use yew::{function_component, html, Html, Properties};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
 
-use crate::components::redactedBytesComponent::Direction;
-use crate::components::redactedBytesComponent::RedactedBytesComponent;
+use crate::components::redacted_bytes_component::Direction;
+use crate::components::redacted_bytes_component::RedactedBytesComponent;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub name: String,
     pub file_type: String,
     pub data: Vec<u8>,
+    pub pem: p256::PublicKey,
 }
 
 #[function_component]
 pub fn ViewFile(props: &Props) -> Html {
-    fn notary_pubkey() -> p256::PublicKey {
-        // from https://github.com/tlsnotary/notary-server/tree/main/src/fixture/notary/notary.key
-        // converted with `openssl ec -in notary.key -pubout -outform PEM`
-
-        let pem = "-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr
-cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
------END PUBLIC KEY-----";
-
-        p256::PublicKey::from_public_key_pem(pem).unwrap()
-    }
-
     // Verify the session proof against the Notary's public key
-    fn verify_proof(session: &SessionProof) -> Result<(), String> {
+    fn verify_proof(session: &SessionProof, pem: p256::PublicKey) -> Result<(), String> {
         // This verifies the identity of the server using a default certificate verifier which trusts
         // the root certificates from the `webpki-roots` crate.
 
         session
-            .verify_with_default_cert_verifier(notary_pubkey())
+            .verify_with_default_cert_verifier(pem)
             .map_err(|err| err.to_string())
     }
 
-    fn parse_tls_proof(json_str: &str) -> Html {
+    fn parse_tls_proof(json_str: &str, pem: p256::PublicKey) -> Html {
         let tls_proof: Result<TlsProof, serde_json::Error> = serde_json::from_str(json_str);
 
         // info!("Parsing");
@@ -57,7 +45,7 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                     substrings,
                 } = tls_proof;
 
-                let proof_verification = verify_proof(&session);
+                let proof_verification = verify_proof(&session, pem);
 
                 if proof_verification.is_err() {
                     return html! {
@@ -137,7 +125,7 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                 <div class="flex-1 flex flex-col justify-center p-4">
                     <div class="container mx-auto px-4">
                     if props.file_type.contains("application/json") {
-                        {parse_tls_proof(json_str)}
+                        {parse_tls_proof(json_str, props.pem)}
                     }
                     </div>
                 </div>

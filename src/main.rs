@@ -3,12 +3,18 @@ use gloo::file::callbacks::FileReader;
 use gloo::file::File;
 use std::collections::HashMap;
 
+#[allow(unused_imports)]
+use gloo::console::log;
+
 use web_sys::{DragEvent, Event, FileList, HtmlInputElement};
 use yew::html::TargetCast;
-use yew::{html, Callback, Component, Context, Html, Properties};
+use yew::prelude::*;
 
 mod components;
-use crate::components::viewFile::ViewFile;
+use crate::components::pem_input::PemInputComponent;
+use crate::components::pem_input::DEFAULT_PEM;
+use crate::components::view_file::ViewFile;
+use elliptic_curve::pkcs8::DecodePublicKey;
 
 #[derive(Properties, PartialEq)]
 struct FileDetails {
@@ -20,11 +26,13 @@ struct FileDetails {
 pub enum Msg {
     Loaded(String, String, Vec<u8>),
     Files(Vec<File>),
+    Pem(p256::PublicKey),
 }
 
 pub struct App {
     readers: HashMap<String, FileReader>,
     files: Vec<FileDetails>,
+    pem: p256::PublicKey,
 }
 
 impl Component for App {
@@ -35,6 +43,7 @@ impl Component for App {
         Self {
             readers: HashMap::default(),
             files: Vec::default(),
+            pem: p256::PublicKey::from_public_key_pem(DEFAULT_PEM).unwrap(),
         }
     }
 
@@ -47,6 +56,10 @@ impl Component for App {
                     name: file_name.clone(),
                 });
                 self.readers.remove(&file_name);
+                true
+            }
+            Msg::Pem(pem) => {
+                self.pem = pem;
                 true
             }
             Msg::Files(files) => {
@@ -151,9 +164,11 @@ impl Component for App {
                     })}
                 />
 
+                <PemInputComponent pem_callback={ctx.link().callback(|pem| Msg::Pem(pem))}/>
+
                 <div>
                     {for self.files.iter().rev().map(|file| html! {
-                        <ViewFile name={file.name.clone()} file_type={file.file_type.clone()} data={file.data.clone()} />
+                        <ViewFile name={file.name.clone()} file_type={file.file_type.clone()} data={file.data.clone()} pem={self.pem} />
                     })}
                 </div>
             </div>
