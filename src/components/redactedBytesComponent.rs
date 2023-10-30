@@ -35,7 +35,7 @@ fn split_text(text: String) -> Vec<String> {
             if (c == REDACTED_CHAR) == (previous_c == REDACTED_CHAR) {
                 current_part.push(c);
             } else {
-                if current_part.len() > 0 {
+                if !current_part.is_empty() {
                     acc.push(current_part.clone());
                 }
                 current_part.clear();
@@ -44,7 +44,7 @@ fn split_text(text: String) -> Vec<String> {
             (acc, current_part)
         },
     );
-    if (last_part.len() > 0) {
+    if !last_part.is_empty() {
         parts.push(last_part);
     }
     parts
@@ -71,7 +71,7 @@ fn redactions_in_red(text: String) -> Html {
 pub fn RedactedBytesComponent(props: &Props) -> Html {
     let Props { direction, bytes } = props;
 
-    let redacted_transcript = bytes.replace("\0", REDACTED_CHAR.to_string().as_str());
+    let redacted_transcript = bytes.replace('\0', REDACTED_CHAR.to_string().as_str());
 
     html! {
         <details class="p-4 w-5/6" open={true}>
