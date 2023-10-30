@@ -26,8 +26,8 @@ pub struct Props {
     pub bytes: String,
 }
 
-fn redactions_in_red(text: String) -> Html {
-    //split the text in regular text parts and redacted parts
+//split the text in regular text parts and redacted parts
+fn split_text(text: String) -> Vec<String> {
     let (mut parts, last_part) = text.chars().fold(
         (Vec::new(), String::new()),
         |(mut acc, mut current_part), c| {
@@ -35,14 +35,23 @@ fn redactions_in_red(text: String) -> Html {
             if (c == REDACTED_CHAR) == (previous_c == REDACTED_CHAR) {
                 current_part.push(c);
             } else {
-                acc.push(current_part.clone());
+                if current_part.len() > 0 {
+                    acc.push(current_part.clone());
+                }
                 current_part.clear();
                 current_part.push(c);
             }
             (acc, current_part)
         },
     );
-    parts.push(last_part);
+    if (last_part.len() > 0) {
+        parts.push(last_part);
+    }
+    parts
+}
+
+fn redactions_in_red(text: String) -> Html {
+    let parts = split_text(text);
 
     //color redacted parts in red
     let html: Html = parts
@@ -71,5 +80,59 @@ pub fn RedactedBytesComponent(props: &Props) -> Html {
                 <pre>{redactions_in_red(redacted_transcript)}</pre>
             </div>
         </details>
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn redacted(length: usize) -> String {
+        '█'.to_string().repeat(length)
+    }
+
+    #[test]
+    fn test_split_text_starts_with_redacted() {
+        let foobar = String::from("foobar");
+        let text = format!("{}{}", redacted(8), &foobar);
+        let result1 = split_text(text.to_owned());
+        assert_eq!(result1, vec![redacted(8), foobar]);
+    }
+
+    #[test]
+    fn test_split_text_no_redactions() {
+        let text = "NoRedactedParts";
+        let result = split_text(text.to_owned());
+        assert_eq!(result, vec![text]);
+    }
+
+    #[test]
+    fn test_split_text_ends_with_redaction() {
+        let foobar = String::from("foobar");
+        let text = format!("{}{}", &foobar, redacted(8));
+        let result = split_text(text);
+        assert_eq!(result, vec![foobar, redacted(8)]);
+    }
+
+    #[test]
+    fn test_split_text_multiple() {
+        let text = format!("foobar {} test {} end", redacted(8), redacted(1));
+        let result = split_text(text);
+        assert_eq!(
+            result,
+            vec![
+                "foobar ",
+                redacted(8).as_str(),
+                " test ",
+                redacted(1).as_str(),
+                " end"
+            ]
+        );
+    }
+
+    #[test]
+    fn test_split_text_empty() {
+        let result5 = split_text(String::from(""));
+        assert_eq!(result5, Vec::<String>::new());
     }
 }
