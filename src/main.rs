@@ -8,13 +8,10 @@ use web_time::Duration;
 
 use web_sys::{DragEvent, Event, FileList, HtmlInputElement};
 use yew::html::TargetCast;
-use yew::{html, AttrValue, Callback, Component, Context, Html};
-use yew_icons::{Icon, IconId};
+use yew::{html, Callback, Component, Context, Html};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
 use tlsn_core::NotarizedSession;
-
-const REDACTED_CHAR: &str = "█";
 
 mod components;
 use crate::components::redactedBytesComponent::Direction;
@@ -156,7 +153,7 @@ impl Component for App {
 
 impl App {
     fn view_file(file: &FileDetails) -> Html {
-        fn parse_notarized_session(json_str: &str) -> Html {
+        fn _parse_notarized_session(json_str: &str) -> Html {
             let notarized_session: Result<NotarizedSession, serde_json::Error> =
                 serde_json::from_str(json_str);
 
@@ -166,7 +163,7 @@ impl App {
                     let time = chrono::DateTime::UNIX_EPOCH
                         + Duration::from_secs(header.handshake_summary().time());
 
-                    return html! {
+                    html! {
                         <>
                             <li>
                                 <b>{"domain: " }</b>{notarized_session.data().server_name().as_str().to_string()}
@@ -175,7 +172,7 @@ impl App {
                                 <b>{"Notarization time: " }</b>{time}
                             </li>
                         </>
-                    };
+                    }
                 }
                 Err(e) => html! {
                      <div>{format!("Parsing failed {}", e.to_string())}</div>
@@ -202,7 +199,7 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
 
             session
                 .verify_with_default_cert_verifier(notary_pubkey())
-                .or_else(|err| return Err(err.to_string()))
+                .map_err(|err| err.to_string())
         }
 
         fn parse_tls_proof(json_str: &str) -> Html {
@@ -265,10 +262,8 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
 
                     let bytes_received = String::from_utf8(recv.data().to_vec()).unwrap();
 
-                    let direction = Direction::Send;
-                    return html! {
+                    html! {
                         <div class="p-4 flex flex-col justify-center items-center w-full">
-                            // {test}
                             <div class="p-4 w-5/6">
                                 <b>{"Server domain:" }</b>
                                 <div class="bg-black text-white p-4 rounded-md">
@@ -283,12 +278,12 @@ cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
                                     <pre>{proof_verification_feedback}</pre>
                                 </div>
                             </div>
+
                             <RedactedBytesComponent direction={Direction::Send} bytes={bytes_send} />
 
                             <RedactedBytesComponent direction={Direction::Received} bytes={bytes_received} />
-
                         </div>
-                    };
+                    }
                 }
                 Err(e) => html! {
                      <div>{format!("Parsing failed {}", e.to_string())}</div>
