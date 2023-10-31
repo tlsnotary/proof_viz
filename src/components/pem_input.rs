@@ -55,7 +55,7 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
     };
 
     html! {
-        <div class="container flex mx-auto border border-white border-dashed rounded-2xl p-4">
+        <div class="container flex mx-auto p-4">
             <div class="w-full">
                 <details class="w-full" open={false}>
                     <summary class="cursor-pointer px-8 py-2"><b>{"Change Notary Public Key:" }</b>{if invalid_input.as_ref().is_some() {" ❌"} else {""}}</summary>
