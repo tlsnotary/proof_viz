@@ -1,5 +1,7 @@
 use elliptic_curve::pkcs8::DecodePublicKey;
-// use gloo::console::log;
+
+#[allow(unused_imports)]
+use gloo::console::log;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -34,7 +36,7 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
                 Ok(public_key) => {
                     input_value.set(value.clone());
                     invalid_input.set(None);
-                    callback.emit(public_key.clone());
+                    callback.emit(public_key);
                 }
                 Err(err) => {
                     input_value.set(value.clone());
@@ -45,26 +47,31 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
         })
     };
 
+    // Toggling styles based on the presence of an error
     let style = if invalid_input.is_none() {
         "text-sm text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
     } else {
-        "text-sm text-pink-600 border-pink-500 focus:border-pink-500 focus:ring-pink-500"
+        "text-sm text-red-500 border-red-500 focus:border-red-500 focus:ring-red-500"
     };
 
     html! {
-        <div class={style}>
-            <details class="p-4 w-5/6" open={false}>
-                <summary><b>{"Change Notary Public Key:" }</b>{if invalid_input.as_ref().is_some() {" ❌"} else {""}}</summary>
-                <textarea class="block p-2.5 w-full bg-gray-700"
-                    id="pem-input"
-                    rows="4"
-                    value={input_value.to_string()}
-                    oninput={oninput} >
-                </textarea>
-                if let Some(x) = invalid_input.as_ref() {
-                    <p>{x}</p>
-                }
-            </details>
+        <div class="container flex mx-auto border border-white border-dashed rounded-2xl p-4">
+            <div class="w-full">
+                <details class="w-full" open={false}>
+                    <summary class="cursor-pointer px-8 py-2"><b>{"Change Notary Public Key:" }</b>{if invalid_input.as_ref().is_some() {" ❌"} else {""}}</summary>
+                    <div class="px-8">
+                        <textarea class={style.to_string() + " block p-2.5 w-full bg-zinc-700 mt-2 border rounded"}
+                            id="pem-input"
+                            rows="4"
+                            value={input_value.to_string()}
+                            oninput={oninput} >
+                        </textarea>
+                        if let Some(error_message) = invalid_input.as_ref() {
+                            <p class="mt-2 text-red-500">{error_message}</p>
+                        }
+                    </div>
+                </details>
+            </div>
         </div>
     }
 }

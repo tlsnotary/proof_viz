@@ -164,7 +164,7 @@ impl Component for App {
                     })}
                 />
 
-                <PemInputComponent pem_callback={ctx.link().callback(|pem| Msg::Pem(pem))}/>
+                <PemInputComponent pem_callback={ctx.link().callback(Msg::Pem)}/>
 
                 <div>
                     {for self.files.iter().rev().map(|file| html! {
