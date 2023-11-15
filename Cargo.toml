@@ -18,12 +18,6 @@ elliptic-curve = { version = "0.13.5", features = ["pkcs8"] }
 webpki-roots = "0.25.2"
 wasm-logger = "0.2.0"
 web-time = "0.2"
-yew_icons = { version = "0.8.0", features = [
-    # https://finnbear.github.io/yew_icons/
-    "FontAwesomeSolidUpload",
-    "BootstrapCloudUploadFill",
-] }
-
 
 # tlsn-core = { git = "https://github.com/tlsnotary/tlsn", branch = "dev" }
 [dependencies.tlsn-core]
