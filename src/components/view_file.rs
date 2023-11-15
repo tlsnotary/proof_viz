@@ -6,6 +6,7 @@ use yew::{function_component, html, Html, Properties};
 
 use tlsn_core::proof::{SessionProof, TlsProof};
 
+use crate::components::content_iframe::ContentIFrame;
 use crate::components::redacted_bytes_component::Direction;
 use crate::components::redacted_bytes_component::RedactedBytesComponent;
 
@@ -106,6 +107,8 @@ pub fn ViewFile(props: &Props) -> Html {
                         </div>
 
                         <RedactedBytesComponent direction={Direction::Send} bytes={bytes_send} />
+
+                        <ContentIFrame bytes={bytes_received.clone()} />
 
                         <RedactedBytesComponent direction={Direction::Received} bytes={bytes_received} />
                     </div>
