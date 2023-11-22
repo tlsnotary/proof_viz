@@ -11,7 +11,7 @@ use crate::components::content_iframe::ContentIFrame;
 use crate::components::redacted_bytes_component::Direction;
 use crate::components::redacted_bytes_component::RedactedBytesComponent;
 
-const REDACTED_CHAR: char = '█'; // 'X'. '🙈';
+const REDACTED_CHAR: char = 'X'; // '█' '🙈' 'X'
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -84,13 +84,12 @@ pub fn ViewFile(props: &Props) -> Html {
                 // This returns the redacted transcripts
                 let (mut sent, mut recv) = substrings.verify(&header).unwrap();
 
-                // Replace the bytes which the Prover chose not to disclose with '\0'
-                sent.set_redacted(b'\0');
-                recv.set_redacted(b'\0');
+                // Replace the bytes which the Prover chose not to disclose with 'X'
+                sent.set_redacted(b'X');
+                recv.set_redacted(b'X');
 
                 let redacted_ranges_send: Vec<Range<usize>> =
                     sent.redacted().clone().iter_ranges().collect();
-                let bytes_recv = String::from_utf8(recv.data().to_vec()).unwrap();
                 let redacted_ranges_recv: Vec<Range<usize>> =
                     recv.redacted().clone().iter_ranges().collect();
 
@@ -113,7 +112,7 @@ pub fn ViewFile(props: &Props) -> Html {
 
                         <RedactedBytesComponent direction={Direction::Send} redacted_char={REDACTED_CHAR} bytes={sent.data().to_vec()} redacted_ranges={redacted_ranges_send} />
 
-                        <ContentIFrame bytes={bytes_recv.clone()} />
+                        <ContentIFrame bytes={recv.data().to_vec()} />
 
                         <RedactedBytesComponent direction={Direction::Received} redacted_char={REDACTED_CHAR} bytes={recv.data().to_vec()} redacted_ranges={redacted_ranges_recv} />
 

@@ -1,45 +1,76 @@
+use gloo::console::log;
 use std::fmt;
 
-use gloo::console::log;
+use spansy::http::parse_response;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
-    pub bytes: String,
+    pub bytes: Vec<u8>,
 }
 
-fn render(content: String) -> Html {
-    html! {
-        <iframe class="w-full h-64" srcdoc={content} src="demo_iframe_srcdoc.htm">
-            <p>{">Your browser does not support iframes."}</p>
-        </iframe>
+fn render_json(content: String) -> String {
+    let json = serde_json::from_str::<serde_json::Value>(content.as_str());
+    if let Ok(json) = json {
+        serde_json::to_string_pretty(&json).unwrap()
+    } else {
+        content
+    }
+}
+
+#[derive(Debug)]
+enum ContentType {
+    html,
+    json,
+    other,
+}
+fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
+    match parse_response(&bytes) {
+        Ok(x) => {
+            // log!(format!("Test {:?}", x.headers));
+
+            let content_type = (&x)
+                .header("Content-Type")
+                .map_or(ContentType::other, |header| {
+                    let type_string = String::from_utf8_lossy(header.value.as_bytes());
+                    match type_string {
+                        s if s.contains("text/html") => ContentType::html,
+                        s if s.contains("application/json") => ContentType::json,
+                        _ => ContentType::other,
+                    }
+                });
+
+            let body = x.body.map_or(String::new(), |body| {
+                String::from_utf8_lossy(body.as_bytes()).to_string()
+            });
+
+            // log!(format!("Test {:?}", content_type));
+
+            (content_type, body)
+        }
+        Err(e) => (ContentType::other, e.to_string()),
     }
 }
 
 #[function_component]
 pub fn ContentIFrame(props: &Props) -> Html {
-    let content = format!("{}", &props.bytes);
-
-    // Content-Type: text/html
-    let start_html = content.find("<html");
-    let end_html = content.find("/html>");
-
-    let frame = if start_html.is_some() && end_html.is_some() {
-        let html_content = content[start_html.unwrap()..end_html.unwrap() + 5].to_string();
-        log!("html: {}", html_content.clone());
-        render(html_content)
-    } else {
-        // Content-Type: application/json
-
-        let start_html = content.find("<html");
-        let end_html = content.find("/html>");
-
-        render(content)
-    };
-
-    html! {
-        <details class="p-4 w-5/6" open={true}>
-            {frame}
-        </details>
+    match get_content_type(&props.bytes) {
+        (ContentType::html, content_html) => html! {
+            <details class="p-4 w-5/6" open={true}>
+                <summary><b>{"Received HTML content:"}</b></summary>
+                <iframe class="w-full h-64" srcdoc={content_html} src="demo_iframe_srcdoc.htm">
+                    <p>{">Your browser does not support iframes."}</p>
+                </iframe>
+            </details>
+        },
+        (ContentType::json, content_json) => html! {
+            <details class="p-4 w-5/6" open={true}>
+                <summary><b>{"Received JSON content:"}</b></summary>
+                <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
+                    <pre>{render_json(content_json)}</pre>
+                </div>
+            </details>
+        },
+        _ => html! {},
     }
 }
