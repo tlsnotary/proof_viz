@@ -1,4 +1,5 @@
 extern crate base64;
+use std::ops::Range;
 use std::str;
 use web_time::Duration;
 
@@ -9,6 +10,8 @@ use tlsn_core::proof::{SessionProof, TlsProof};
 use crate::components::content_iframe::ContentIFrame;
 use crate::components::redacted_bytes_component::Direction;
 use crate::components::redacted_bytes_component::RedactedBytesComponent;
+
+const REDACTED_CHAR: char = '█'; // 'X'. '🙈';
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -85,9 +88,11 @@ pub fn ViewFile(props: &Props) -> Html {
                 sent.set_redacted(b'\0');
                 recv.set_redacted(b'\0');
 
-                let bytes_send = String::from_utf8(sent.data().to_vec()).unwrap();
-
-                let bytes_received = String::from_utf8(recv.data().to_vec()).unwrap();
+                let redacted_ranges_send: Vec<Range<usize>> =
+                    sent.redacted().clone().iter_ranges().collect();
+                let bytes_recv = String::from_utf8(recv.data().to_vec()).unwrap();
+                let redacted_ranges_recv: Vec<Range<usize>> =
+                    recv.redacted().clone().iter_ranges().collect();
 
                 html! {
                     <div class="p-4 flex flex-col justify-center items-center w-full">
@@ -106,11 +111,12 @@ pub fn ViewFile(props: &Props) -> Html {
                             </div>
                         </div>
 
-                        <RedactedBytesComponent direction={Direction::Send} bytes={bytes_send} />
+                        <RedactedBytesComponent direction={Direction::Send} redacted_char={REDACTED_CHAR} bytes={sent.data().to_vec()} redacted_ranges={redacted_ranges_send} />
 
-                        <ContentIFrame bytes={bytes_received.clone()} />
+                        <ContentIFrame bytes={bytes_recv.clone()} />
 
-                        <RedactedBytesComponent direction={Direction::Received} bytes={bytes_received} />
+                        <RedactedBytesComponent direction={Direction::Received} redacted_char={REDACTED_CHAR} bytes={recv.data().to_vec()} redacted_ranges={redacted_ranges_recv} />
+
                     </div>
                 }
             }
