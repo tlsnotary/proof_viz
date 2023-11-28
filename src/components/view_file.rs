@@ -25,9 +25,6 @@ pub struct Props {
 pub fn ViewFile(props: &Props) -> Html {
     // Verify the session proof against the Notary's public key
     fn verify_proof(session: &SessionProof, pem: p256::PublicKey) -> Result<(), String> {
-        // This verifies the identity of the server using a default certificate verifier which trusts
-        // the root certificates from the `webpki-roots` crate.
-
         session
             .verify_with_default_cert_verifier(pem)
             .map_err(|err| err.to_string())
@@ -36,9 +33,10 @@ pub fn ViewFile(props: &Props) -> Html {
     fn parse_tls_proof(json_str: &str, pem: p256::PublicKey) -> Html {
         let tls_proof: Result<TlsProof, serde_json::Error> = serde_json::from_str(json_str);
 
-        // info!("Parsing");
-
         match tls_proof {
+            Err(e) => html! {
+                 <div>{format!("Parsing failed {}", e.to_string())}</div>
+            },
             Ok(tls_proof) => {
                 let TlsProof {
                     // The session proof establishes the identity of the server and the commitments
@@ -119,9 +117,6 @@ pub fn ViewFile(props: &Props) -> Html {
                     </div>
                 }
             }
-            Err(e) => html! {
-                 <div>{format!("Parsing failed {}", e.to_string())}</div>
-            },
         }
     }
 
