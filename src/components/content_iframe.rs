@@ -2,6 +2,7 @@ use gloo::console::log;
 use std::fmt;
 
 use spansy::http::parse_response;
+use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq, Properties)]
@@ -54,6 +55,9 @@ fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
 
 #[function_component]
 pub fn ContentIFrame(props: &Props) -> Html {
+    // JavaScript function to trigger Prism highlighting
+    use_effect(move || highlight_code());
+
     match get_content_type(&props.bytes) {
         (ContentType::Html, content_html) => html! {
             <details class="p-4 w-5/6" open={true}>
@@ -67,10 +71,19 @@ pub fn ContentIFrame(props: &Props) -> Html {
             <details class="p-4 w-5/6" open={true}>
                 <summary><b>{"Received JSON content:"}</b></summary>
                 <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
-                    <pre>{render_json(content_json)}</pre>
+                    <pre>
+                        <code class="lang-json">
+                            {render_json(content_json)}
+                        </code>
+                    </pre>
                 </div>
             </details>
         },
         _ => html! {},
     }
+}
+
+#[wasm_bindgen(inline_js = "export function highlight_code() { Prism.highlightAll(); }")]
+extern "C" {
+    fn highlight_code();
 }
