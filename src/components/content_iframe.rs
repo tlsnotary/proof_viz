@@ -20,9 +20,9 @@ fn render_json(content: String) -> String {
 
 #[derive(Debug)]
 enum ContentType {
-    html,
-    json,
-    other,
+    Html,
+    Json,
+    Other,
 }
 fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
     match parse_response(&bytes) {
@@ -31,12 +31,12 @@ fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
 
             let content_type = (&x)
                 .header("Content-Type")
-                .map_or(ContentType::other, |header| {
+                .map_or(ContentType::Other, |header| {
                     let type_string = String::from_utf8_lossy(header.value.as_bytes());
                     match type_string {
-                        s if s.contains("text/html") => ContentType::html,
-                        s if s.contains("application/json") => ContentType::json,
-                        _ => ContentType::other,
+                        s if s.contains("text/html") => ContentType::Html,
+                        s if s.contains("application/json") => ContentType::Json,
+                        _ => ContentType::Other,
                     }
                 });
 
@@ -48,14 +48,14 @@ fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
 
             (content_type, body)
         }
-        Err(e) => (ContentType::other, e.to_string()),
+        Err(e) => (ContentType::Other, e.to_string()),
     }
 }
 
 #[function_component]
 pub fn ContentIFrame(props: &Props) -> Html {
     match get_content_type(&props.bytes) {
-        (ContentType::html, content_html) => html! {
+        (ContentType::Html, content_html) => html! {
             <details class="p-4 w-5/6" open={true}>
                 <summary><b>{"Received HTML content:"}</b></summary>
                 <iframe class="w-full h-64" srcdoc={content_html} src="demo_iframe_srcdoc.htm">
@@ -63,7 +63,7 @@ pub fn ContentIFrame(props: &Props) -> Html {
                 </iframe>
             </details>
         },
-        (ContentType::json, content_json) => html! {
+        (ContentType::Json, content_json) => html! {
             <details class="p-4 w-5/6" open={true}>
                 <summary><b>{"Received JSON content:"}</b></summary>
                 <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
