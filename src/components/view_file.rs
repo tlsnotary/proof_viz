@@ -31,7 +31,7 @@ pub fn ViewFile(props: &Props) -> Html {
     }
 
     fn parse_tls_proof(json_str: &str, pem: p256::PublicKey) -> Html {
-        let tls_proof: Result<TlsProof, serde_json::Error> = serde_json::from_str(json_str);
+        let tls_proof = serde_json::from_str(json_str);
 
         match tls_proof {
             Err(e) => html! {
