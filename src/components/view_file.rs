@@ -78,9 +78,25 @@ pub fn ViewFile(props: &Props) -> Html {
                 let time = chrono::DateTime::UNIX_EPOCH + Duration::from_secs(header.time());
 
                 // Verify the substrings proof against the session header.
+                let substring_verification_result = substrings.verify(&header);
+
+                if substring_verification_result.is_err() {
+                    return html! {
+                        <>
+                            <div role="alert">
+                                <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
+                                    {"Invalid Proof"}
+                                </div>
+                                <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+                                    { "❌ " }{substring_verification_result.unwrap_err().to_string()}
+                                </div>
+                            </div>
+                        </>
+                    };
+                }
 
                 // This returns the redacted transcripts
-                let (mut sent, mut recv) = substrings.verify(&header).unwrap();
+                let (mut sent, mut recv) = substring_verification_result.unwrap();
 
                 // Replace the bytes which the Prover chose not to disclose with 'X'
                 sent.set_redacted(b'X');
