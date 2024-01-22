@@ -1,4 +1,4 @@
-use elliptic_curve::pkcs8::DecodePublicKey;
+use elliptic_curve::{pkcs8::DecodePublicKey, PublicKey};
 
 #[allow(unused_imports)]
 use gloo::console::log;
@@ -15,6 +15,12 @@ pub struct Props {
 pub const DEFAULT_PEM: &str = "-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr
 cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
+-----END PUBLIC KEY-----";
+
+// from https://notary.pse.dev/info
+pub const NOTARY_PSE_PEM: &str = "-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu
+3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==
 -----END PUBLIC KEY-----";
 
 #[function_component(PemInputComponent)]
@@ -47,6 +53,34 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
         })
     };
 
+    let notary_pse_dev = {
+        let input_value = input_value.clone();
+        let callback = pem_callback.clone();
+        let invalid_input = invalid_input.clone();
+
+        Callback::from(move |_| {
+            let public_key = p256::PublicKey::from_public_key_pem(NOTARY_PSE_PEM)
+                .expect("should be a valid public key");
+            input_value.set(NOTARY_PSE_PEM.into());
+            invalid_input.set(None);
+            callback.emit(public_key);
+        })
+    };
+
+    let default = {
+        let input_value = input_value.clone();
+        let callback = pem_callback.clone();
+        let invalid_input = invalid_input.clone();
+
+        Callback::from(move |_| {
+            let public_key = p256::PublicKey::from_public_key_pem(DEFAULT_PEM)
+                .expect("should be a valid public key");
+            input_value.set(DEFAULT_PEM.into());
+            invalid_input.set(None);
+            callback.emit(public_key);
+        })
+    };
+
     // Toggling styles based on the presence of an error
     let style = if invalid_input.is_none() {
         "text-sm text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
@@ -69,6 +103,14 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
                         if let Some(error_message) = invalid_input.as_ref() {
                             <p class="mt-2 text-red-500">{error_message}</p>
                         }
+                        <div class="h-fit min-h-full flex justify-end">
+                          <button class="float-right px-4 py-2 hover:bg-black hover:text-white rounded border-black border"
+                           onclick={notary_pse_dev}>{ "notary.pse.dev" }
+                           </button>
+                           <button class="float-right px-4 py-2 hover:bg-black hover:text-white rounded border-black border"
+                           onclick={default}>{ "default" }
+                           </button>
+                        </div>
                     </div>
                 </details>
             </div>
