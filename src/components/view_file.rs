@@ -70,7 +70,7 @@ pub fn ViewFile(props: &Props) -> Html {
                     // The session header that was signed by the Notary is a succinct commitment to the TLS transcript.
                     header,
                     // This is the server name, checked against the certificate chain shared in the TLS handshake.
-                    server_name,
+                    session_info,
                     ..
                 } = session;
 
@@ -112,7 +112,7 @@ pub fn ViewFile(props: &Props) -> Html {
                         <div class="p-4 w-5/6">
                             <b>{"Server domain:" }</b>
                             <div class="bg-black text-white p-4 rounded-md">
-                                <pre>{server_name.as_str().to_string()}</pre>
+                                <pre>{session_info.server_name.as_str().to_string()}</pre>
                             </div>
                             <b>{"Notarization time:" }</b>
                             <div class="bg-black text-white p-4 rounded-md">

@@ -31,7 +31,9 @@ fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
             // log!(format!("Test {:?}", x.headers));
 
             let content_type = (&x)
-                .header("Content-Type")
+                .headers
+                .iter()
+                .find(|h| h.name.as_str().to_lowercase() == "content-type")
                 .map_or(ContentType::Other, |header| {
                     let type_string = String::from_utf8_lossy(header.value.as_bytes());
                     match type_string {
