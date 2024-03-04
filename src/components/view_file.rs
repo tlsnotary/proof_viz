@@ -102,7 +102,7 @@ pub fn ViewFile(props: &Props) -> Html {
                 sent.set_redacted(b'X');
                 recv.set_redacted(b'X');
 
-                let redacted_ranges_send: Vec<Range<usize>> =
+                let redacted_ranges_sent: Vec<Range<usize>> =
                     sent.redacted().clone().iter_ranges().collect();
                 let redacted_ranges_recv: Vec<Range<usize>> =
                     recv.redacted().clone().iter_ranges().collect();
@@ -124,7 +124,7 @@ pub fn ViewFile(props: &Props) -> Html {
                             </div>
                         </div>
 
-                        <RedactedBytesComponent direction={Direction::Send} redacted_char={REDACTED_CHAR} bytes={sent.data().to_vec()} redacted_ranges={redacted_ranges_send} />
+                        <RedactedBytesComponent direction={Direction::Sent} redacted_char={REDACTED_CHAR} bytes={sent.data().to_vec()} redacted_ranges={redacted_ranges_sent} />
 
                         <ContentIFrame bytes={recv.data().to_vec()} />
 

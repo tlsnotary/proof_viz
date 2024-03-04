@@ -5,14 +5,14 @@ use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
 pub enum Direction {
-    Send,
+    Sent,
     Received,
 }
 
 impl fmt::Display for Direction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Direction::Send => write!(f, "send"),
+            Direction::Sent => write!(f, "sent"),
             Direction::Received => write!(f, "received"),
         }
     }
