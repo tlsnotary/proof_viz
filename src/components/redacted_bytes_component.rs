@@ -1,6 +1,6 @@
 use std::{fmt, ops::Range};
 
-use gloo::console::log;
+// use gloo::console::log;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -27,18 +27,16 @@ pub struct Props {
 }
 
 fn get_redacted_string(redacted_char: &char, size: usize) -> String {
-    if true || size < 10 {
+    if true
+    /*|| size < 10*/
+    {
         redacted_char.to_string().repeat(size)
     } else {
         format! {"{}...{}", redacted_char.to_string().repeat(3), redacted_char.to_string().repeat(3)}
     }
 }
 
-fn redactions_in_red(
-    bytes: &Vec<u8>,
-    redacted_ranges: &Vec<Range<usize>>,
-    redacted_char: &char,
-) -> Html {
+fn redactions_in_red(bytes: &[u8], redacted_ranges: &[Range<usize>], redacted_char: &char) -> Html {
     if redacted_ranges.is_empty() {
         return Html::from(String::from_utf8(bytes.to_vec()).unwrap());
     }
@@ -100,9 +98,14 @@ pub fn RedactedBytesComponent(props: &Props) -> Html {
         redacted_ranges,
     } = props;
 
+    let size = bytes.len();
+    let redacted_size = redacted_ranges
+        .iter()
+        .fold(0, |acc, r| acc + r.end - r.start);
+
     html! {
         <details class="p-4 w-5/6" open={true}>
-            <summary><b>{"Bytes "}{direction}{": " }</b></summary>
+            <summary><b>{"Bytes "}{direction}{": " }</b>{"("}{size}{"B, redacted:"}{redacted_size}{"B)"}</summary>
             <div class="bg-black text-white p-4 rounded-md overflow-x-auto">
                 <pre>{redactions_in_red(bytes, redacted_ranges, redacted_char)}</pre>
             </div>

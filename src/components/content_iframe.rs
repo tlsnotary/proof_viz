@@ -1,5 +1,5 @@
-use gloo::console::log;
-use std::fmt;
+// use gloo::console::log;
+// use std::fmt;
 
 use spansy::http::parse_response;
 use wasm_bindgen::prelude::*;
@@ -26,11 +26,11 @@ enum ContentType {
     Other,
 }
 fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
-    match parse_response(&bytes) {
+    match parse_response(bytes) {
         Ok(x) => {
             // log!(format!("Test {:?}", x.headers));
 
-            let content_type = (&x)
+            let content_type = x
                 .headers
                 .iter()
                 .find(|h| h.name.as_str().to_lowercase() == "content-type")
@@ -58,7 +58,7 @@ fn get_content_type(bytes: &[u8]) -> (ContentType, String) {
 #[function_component]
 pub fn ContentIFrame(props: &Props) -> Html {
     // JavaScript function to trigger Prism highlighting
-    use_effect(move || highlight_code());
+    use_effect(highlight_code);
 
     match get_content_type(&props.bytes) {
         (ContentType::Html, content_html) => html! {

@@ -1,4 +1,4 @@
-use elliptic_curve::{pkcs8::DecodePublicKey, PublicKey};
+use elliptic_curve::pkcs8::DecodePublicKey;
 
 #[allow(unused_imports)]
 use gloo::console::log;
