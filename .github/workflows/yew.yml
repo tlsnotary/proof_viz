@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin
@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Trunk
-        uses: jetli/trunk-action@v0.4.0
+        uses: jetli/trunk-action@v0.5.0
         with:
           # Optional version of trunk to install(eg. 'v0.16.0', 'latest')
           version: "latest"
@@ -37,9 +37,9 @@ jobs:
       - name: Build the Rust WASM app and all of its assets
         run: trunk build --public-url ${{ github.event.repository.name }} --release
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: "./dist"
 
@@ -64,4 +64,4 @@ jobs:
     steps:
         - name: Deploy to GitHub Pages
           id: deployment
-          uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+          uses: actions/deploy-pages@v4.0.5
