@@ -1,0 +1,1 @@
+export function highlight_code() { Prism.highlightAll(); }
