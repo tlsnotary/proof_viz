@@ -14,7 +14,7 @@ mod components;
 use crate::components::pem_input::PemInputComponent;
 use crate::components::pem_input::DEFAULT_PEM;
 use crate::components::view_file::ViewFile;
-use elliptic_curve::pkcs8::DecodePublicKey;
+use k256::{pkcs8::DecodePublicKey, PublicKey};
 
 #[derive(Properties, PartialEq)]
 struct FileDetails {
@@ -26,13 +26,13 @@ struct FileDetails {
 pub enum Msg {
     Loaded(String, String, Vec<u8>),
     Files(Vec<File>),
-    Pem(p256::PublicKey),
+    Pem(k256::PublicKey),
 }
 
 pub struct App {
     readers: HashMap<String, FileReader>,
     files: Vec<FileDetails>,
-    pem: p256::PublicKey,
+    pem: k256::PublicKey,
     is_processing: bool,
 }
 
@@ -44,7 +44,7 @@ impl Component for App {
         Self {
             readers: HashMap::default(),
             files: Vec::default(),
-            pem: p256::PublicKey::from_public_key_pem(DEFAULT_PEM).unwrap(),
+            pem: k256::PublicKey::from_public_key_pem(DEFAULT_PEM).unwrap(),
             is_processing: false,
         }
     }

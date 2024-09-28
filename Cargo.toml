@@ -6,19 +6,19 @@ name = "proof_viz"
 version = "0.1.0"
 
 [dependencies]
-base64 = "0.22.0"
+base64 = "0.22.1"
 chrono = "0.4.31"
 elliptic-curve = {version = "0.13.5", features = ["pkcs8"]}
 getrandom = {version = "0.2.10", features = ["js"]}
 gloo = "0.11.0"
 js-sys = "0.3"
-p256 = {version = "0.13", features = ["ecdsa"]}
+k256 = {version = "0.13", features = ["ecdsa"]}
 serde_json = "1.0.107"
-spansy = {git = "https://github.com/tlsnotary/tlsn-utils", rev = "f8d4533"}
-tlsn-core = {git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.6", package = "tlsn-core"}
-wasm-bindgen = "0.2.89"
+spansy = {git = "https://github.com/tlsnotary/tlsn-utils", rev = "e7b2db6a0c0d0202694754efb77625ee43a14f5a"}
+tlsn-core = {git = "https://github.com/tlsnotary/tlsn.git", branch = "dev", package = "tlsn-core"}
+wasm-bindgen = "0.2.93"
 wasm-logger = "0.2.0"
 web-sys = {version = "0.3", features = ["File", "DragEvent", "DataTransfer"]}
 web-time = "1.0"
-webpki-roots = "0.26.0"
+webpki-roots = "0.26.6"
 yew = {version = "0.21.0", features = ["csr"]}

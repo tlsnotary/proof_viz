@@ -7,20 +7,20 @@ use yew::prelude::*;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub pem_callback: Callback<p256::PublicKey>,
+    pub pem_callback: Callback<k256::PublicKey>,
 }
 
 // from https://github.com/tlsnotary/notary-server/tree/main/src/fixture/notary/notary.key
 // converted with `openssl ec -in notary.key -pubout -outform PEM`
 pub const DEFAULT_PEM: &str = "-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr
-cRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==
+MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650
+OrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==
 -----END PUBLIC KEY-----";
 
 // from https://notary.pse.dev/info
 pub const NOTARY_PSE_PEM: &str = "-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu
-3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==
+MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650
+OrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==
 -----END PUBLIC KEY-----";
 
 #[function_component(PemInputComponent)]
@@ -37,7 +37,7 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
             let input: HtmlInputElement = e.target_unchecked_into();
             let value = input.value().trim().to_string();
 
-            let result = p256::PublicKey::from_public_key_pem(value.as_str());
+            let result = k256::PublicKey::from_public_key_pem(value.as_str());
             match result {
                 Ok(public_key) => {
                     input_value.set(value.clone());
@@ -59,7 +59,7 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
         let invalid_input = invalid_input.clone();
 
         Callback::from(move |_| {
-            let public_key = p256::PublicKey::from_public_key_pem(NOTARY_PSE_PEM)
+            let public_key = k256::PublicKey::from_public_key_pem(NOTARY_PSE_PEM)
                 .expect("should be a valid public key");
             input_value.set(NOTARY_PSE_PEM.into());
             invalid_input.set(None);
@@ -73,7 +73,7 @@ pub fn pem_input_component(Props { pem_callback }: &Props) -> Html {
         let invalid_input = invalid_input.clone();
 
         Callback::from(move |_| {
-            let public_key = p256::PublicKey::from_public_key_pem(DEFAULT_PEM)
+            let public_key = k256::PublicKey::from_public_key_pem(DEFAULT_PEM)
                 .expect("should be a valid public key");
             input_value.set(DEFAULT_PEM.into());
             invalid_input.set(None);
